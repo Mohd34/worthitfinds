@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Amazon Finds</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --bg:      #fdf8f4;
+  --card:    #ffffff;
+  --rose:    #c8707a;
+  --rose-lt: #f5dfe1;
+  --rose-dk: #a85560;
+  --sand:    #e8ddd4;
+  --ink:     #2b2320;
+  --muted:   #9e8f89;
+  --green:   #2d9e6b;
+  --green-lt:#e6f7f0;
+  --danger:  #d94f4f;
+  --radius:  16px;
+  --sh:      0 2px 16px rgba(43,35,32,0.08);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+.hidden { display: none !important; }
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: 'DM Sans', sans-serif; font-weight: 600; font-size: 0.85rem;
+  border: none; border-radius: 10px; padding: 10px 18px;
+  cursor: pointer; transition: opacity .15s, transform .1s;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { opacity: .85; } .btn:active { transform: scale(.97); }
+.btn-rose   { background: var(--rose); color: #fff; }
+.btn-ghost  { background: transparent; border: 1.5px solid var(--sand); color: var(--muted); }
+.btn-ghost:hover { border-color: var(--rose); color: var(--rose); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-green  { background: var(--green); color: #fff; }
+.btn-small  { font-size: 0.75rem; padding: 6px 12px; border-radius: 8px; }
+
+/* ── LOGIN ── */
+#loginScreen {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; min-height: 100vh; padding: 24px;
+}
+.login-box {
+  background: var(--card); border-radius: 20px; box-shadow: var(--sh);
+  padding: 36px 28px; width: 100%; max-width: 360px; text-align: center;
+}
+.login-box h2 { font-family: 'Playfair Display', serif; font-size: 1.4rem; margin-bottom: 6px; }
+.login-box p { font-size: 0.82rem; color: var(--muted); margin-bottom: 24px; }
+.login-box input {
+  width: 100%; background: var(--bg); border: 1.5px solid var(--sand);
+  border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
+  padding: 11px 14px; outline: none; margin-bottom: 12px; color: var(--ink);
+  transition: border-color .2s; text-align: center; letter-spacing: 0.1em;
+}
+.login-box input:focus { border-color: var(--rose); }
+.login-error { font-size: 0.78rem; color: var(--danger); margin-top: 6px; min-height: 18px; }
+
+/* ── ADMIN ── */
+#adminView { display: none; min-height: 100vh; }
+.admin-topbar {
+  background: var(--ink); color: #fff;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; gap: 12px; flex-wrap: wrap;
+  position: sticky; top: 0; z-index: 50;
+}
+.admin-topbar h1 { font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 500; color: #fff; }
+.admin-topbar-right { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.admin-body { max-width: 680px; margin: 0 auto; padding: 28px 16px 60px; }
+
+.section-card {
+  background: var(--card); border-radius: var(--radius);
+  box-shadow: var(--sh); padding: 22px; margin-bottom: 20px;
+}
+.section-card h3 {
+  font-family: 'Playfair Display', serif; font-size: 1rem;
+  font-weight: 500; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+}
+.field-row { margin-bottom: 14px; }
+.field-row label {
+  display: block; font-size: 0.72rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 5px;
+}
+.field-row input, .field-row textarea, .field-row select {
+  width: 100%; background: var(--bg); border: 1.5px solid var(--sand);
+  border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.875rem;
+  padding: 10px 13px; outline: none; color: var(--ink);
+  transition: border-color .2s; resize: vertical;
+}
+.field-row input:focus, .field-row textarea:focus, .field-row select:focus { border-color: var(--rose); }
+.field-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* ── PHOTO UPLOAD WIDGET ── */
+.photo-upload-wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.photo-preview {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--sand); border: 2px dashed var(--rose);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.8rem; overflow: hidden; flex-shrink: 0; cursor: pointer;
+  transition: border-color .2s;
+}
+.photo-preview.rect { border-radius: 12px; }
+.photo-preview img { width: 100%; height: 100%; object-fit: cover; }
+.photo-upload-info { flex: 1; }
+.photo-upload-info p { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+.photo-upload-info .photo-name { font-size: 0.8rem; color: var(--green); font-weight: 600; margin-top: 4px; word-break: break-all; }
+input[type="file"] { display: none; }
+
+/* ── ADMIN LINK ITEMS ── */
+.admin-link-item {
+  background: var(--bg); border: 1.5px solid var(--sand);
+  border-radius: 12px; padding: 12px 14px; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 12px;
+}
+.admin-link-thumb {
+  width: 48px; height: 48px; border-radius: 10px;
+  background: var(--rose-lt); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem; overflow: hidden;
+}
+.admin-link-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+.admin-link-info { flex: 1; min-width: 0; }
+.admin-link-name { font-size: 0.88rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-link-url  { font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.admin-link-cat  { font-size: 0.7rem; background: var(--rose-lt); color: var(--rose-dk); border-radius: 99px; padding: 2px 8px; font-weight: 600; display: inline-block; margin-top: 3px; }
+.admin-link-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.drag-handle { color: var(--sand); cursor: grab; font-size: 1.1rem; padding: 4px; user-select: none; }
+
+.empty-state { text-align: center; padding: 36px 0; color: var(--muted); font-size: 0.85rem; }
+.empty-state .ei { font-size: 2.4rem; margin-bottom: 8px; }
+
+.add-form {
+  background: var(--rose-lt); border: 1.5px dashed var(--rose);
+  border-radius: var(--radius); padding: 20px; margin-top: 14px;
+}
+.add-form h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 14px; color: var(--rose-dk); }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: #fff; font-size: 0.82rem; font-weight: 500;
+  padding: 10px 20px; border-radius: 99px; opacity: 0;
+  transition: opacity .25s, transform .25s; pointer-events: none; z-index: 999; white-space: nowrap;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── PUBLIC VIEW ── */
+#publicView {
+  display: none; flex-direction: column; align-items: center;
+  padding: 0 0 56px; min-height: 100vh;
+}
+.pub-hero {
+  width: 100%; max-width: 580px;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 48px 24px 24px; text-align: center;
+}
+.pub-avatar {
+  width: 92px; height: 92px; border-radius: 50%;
+  background: var(--sand); border: 3px solid #fff;
+  box-shadow: 0 0 0 3px var(--rose), var(--sh);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.4rem; overflow: hidden; margin-bottom: 14px;
+}
+.pub-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.pub-handle { font-size: 0.75rem; font-weight: 600; color: var(--rose); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 5px; }
+.pub-name { font-family: 'Playfair Display', serif; font-size: 1.65rem; font-weight: 700; margin-bottom: 10px; line-height: 1.2; }
+.pub-bio { font-size: 0.85rem; color: var(--muted); line-height: 1.65; max-width: 300px; }
+.pub-socials { display: flex; gap: 10px; margin-top: 16px; }
+.pub-social {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--sand);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--ink); text-decoration: none; transition: background .18s, transform .15s;
+}
+.pub-social:hover { background: var(--rose-lt); transform: scale(1.08); }
+
+.pub-filters {
+  display: flex; gap: 10px; padding: 4px 20px 0;
+  max-width: 580px; width: 100%; overflow-x: auto;
+  scrollbar-width: none; margin-bottom: 20px;
+}
+.pub-filters::-webkit-scrollbar { display: none; }
+.pub-filter-btn {
+  font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600;
+  border: 1.5px solid var(--sand); background: var(--card); color: var(--muted);
+  border-radius: 99px; padding: 9px 20px; cursor: pointer; white-space: nowrap;
+  transition: all .18s; flex-shrink: 0;
+}
+.pub-filter-btn:hover { border-color: var(--rose); color: var(--rose); }
+.pub-filter-btn.active { background: var(--rose); border-color: var(--rose); color: #fff; }
+
+.pub-divider {
+  width: 100%; max-width: 580px;
+  display: flex; align-items: center; gap: 12px;
+  padding: 0 20px; margin-bottom: 18px;
+}
+.pub-divider::before, .pub-divider::after { content: ''; flex: 1; height: 1px; background: var(--sand); }
+.pub-divider span { font-size: 0.72rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+
+.pub-cards {
+  display: flex; flex-direction: column; gap: 14px;
+  width: 100%; max-width: 580px; padding: 0 16px;
+}
+.pub-card {
+  background: var(--card); border-radius: 20px; box-shadow: var(--sh);
+  display: flex; align-items: center; gap: 18px; padding: 18px 20px;
+  text-decoration: none; color: var(--ink); border: 1.5px solid transparent;
+  transition: border-color .18s, transform .15s, box-shadow .18s;
+  position: relative; overflow: hidden;
+}
+.pub-card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+  background: var(--rose); opacity: 0; transition: opacity .18s;
+  border-radius: 5px 0 0 5px;
+}
+.pub-card:hover { border-color: var(--rose-lt); transform: translateY(-3px); box-shadow: 0 8px 28px rgba(200,112,122,0.15); }
+.pub-card:hover::before { opacity: 1; }
+.pub-card-thumb {
+  width: 80px; height: 80px; border-radius: 14px;
+  background: var(--rose-lt); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2rem; overflow: hidden;
+}
+.pub-card-thumb img { width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
+.pub-card-body { flex: 1; min-width: 0; }
+.pub-card-title { font-size: 1.05rem; font-weight: 600; line-height: 1.4; color: var(--ink); margin-bottom: 5px; }
+.pub-card-sub { font-size: 0.82rem; color: var(--muted); }
+.pub-badge { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; border-radius: 99px; padding: 4px 11px; flex-shrink: 0; white-space: nowrap; }
+.pub-badge-fave { background: #fef3c7; color: #92400e; }
+.pub-badge-new  { background: var(--green-lt); color: #145c3c; }
+.pub-badge-sale { background: var(--rose-lt); color: var(--rose-dk); }
+.pub-arrow { color: var(--sand); flex-shrink: 0; font-size: 1.5rem; transition: color .18s, transform .18s; }
+.pub-card:hover .pub-arrow { color: var(--rose); transform: translateX(3px); }
+
+.pub-footer { margin-top: 44px; font-size: 0.72rem; color: var(--muted); text-align: center; line-height: 1.7; }
+.pub-footer a { color: var(--rose); text-decoration: none; }
+
+.admin-fab {
+  position: fixed; bottom: 18px; right: 18px;
+  background: var(--ink); color: #fff; border: none; border-radius: 99px;
+  padding: 10px 18px; font-family: 'DM Sans', sans-serif; font-size: 0.78rem;
+  font-weight: 600; cursor: pointer; box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  opacity: 0.35; transition: opacity .2s; z-index: 40;
+}
+.admin-fab:hover { opacity: 1; }
+
+/* ── EDIT MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.5); z-index: 200;
+  align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--card); border-radius: 20px; padding: 28px;
+  width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto;
+}
+.modal-box h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 18px; }
+.modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; flex-wrap: wrap; }
+
+@media (max-width: 500px) {
+  .field-row-2 { grid-template-columns: 1fr; }
+  .admin-topbar h1 { font-size: 0.95rem; }
+  .photo-upload-wrap { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div style="font-size:2rem;margin-bottom:10px">🔐</div>
+    <h2>Admin Access</h2>
+    <p>Enter your password to manage your links</p>
+    <input type="password" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn btn-rose" style="width:100%;justify-content:center;margin-top:4px" onclick="doLogin()">Sign in</button>
+    <div class="login-error" id="loginError"></div>
+    <div style="margin-top:20px;border-top:1px solid var(--sand);padding-top:16px">
+      <button class="btn btn-ghost btn-small" onclick="showPublic()" style="width:100%;justify-content:center">👁 View public page</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ ADMIN ══════════ -->
+<div id="adminView">
+  <div class="admin-topbar">
+    <h1>✏️ Link Editor</h1>
+    <div class="admin-topbar-right">
+      <button class="btn btn-ghost btn-small" onclick="changePassword()">🔑 Change Password</button>
+      <button class="btn btn-rose btn-small" onclick="showPublic()">👁 Preview Page</button>
+      <button class="btn btn-ghost btn-small" onclick="logout()">Log out</button>
+    </div>
+  </div>
+
+  <div class="admin-body">
+
+    <!-- Profile -->
+    <div class="section-card">
+      <h3>👤 Your Profile</h3>
+
+      <!-- Profile photo upload -->
+      <div class="field-row">
+        <label>Profile Photo</label>
+        <div class="photo-upload-wrap">
+          <div class="photo-preview" id="profilePhotoPreview" onclick="document.getElementById('profilePhotoInput').click()" title="Click to upload photo">
+            🛍️
+          </div>
+          <div class="photo-upload-info">
+            <button class="btn btn-ghost btn-small" onclick="document.getElementById('profilePhotoInput').click()">📷 Upload Photo</button>
+            <p>JPG, PNG or WEBP · Max 5MB<br>Recommended: square photo</p>
+            <div class="photo-name" id="profilePhotoName"></div>
+          </div>
+        </div>
+        <input type="file" id="profilePhotoInput" accept="image/*" onchange="handleProfilePhoto(this)">
+      </div>
+
+      <div class="field-row">
+        <label>Display Name</label>
+        <input type="text" id="p-name" placeholder="e.g. Julia's Favourites">
+      </div>
+      <div class="field-row-2">
+        <div class="field-row" style="margin-bottom:0">
+          <label>Instagram Handle</label>
+          <input type="text" id="p-insta" placeholder="@yourhandle">
+        </div>
+        <div class="field-row" style="margin-bottom:0">
+          <label>TikTok Handle</label>
+          <input type="text" id="p-tiktok" placeholder="@yourhandle">
+        </div>
+      </div>
+      <div class="field-row" style="margin-top:14px">
+        <label>Bio</label>
+        <textarea id="p-bio" rows="2" placeholder="Amazon finds I actually love & use ✨"></textarea>
+      </div>
+      <button class="btn btn-green btn-small" onclick="saveProfile()">💾 Save Profile</button>
+    </div>
+
+    <!-- Links -->
+    <div class="section-card">
+      <h3>🔗 Your Links <span style="font-family:'DM Sans';font-size:0.75rem;font-weight:400;color:var(--muted)" id="linkCount"></span></h3>
+      <div id="adminLinkList"></div>
+
+      <!-- Add form -->
+      <div id="addFormWrap" class="hidden">
+        <div class="add-form">
+          <h4>+ New Link</h4>
+          <div class="field-row">
+            <label>Product Name *</label>
+            <input type="text" id="f-name" placeholder="e.g. COSRX Snail Mucin Serum">
+          </div>
+          <div class="field-row">
+            <label>Amazon Affiliate URL *</label>
+            <input type="url" id="f-url" placeholder="https://amzn.to/...">
+          </div>
+
+          <!-- Product image upload -->
+          <div class="field-row">
+            <label>Product Image</label>
+            <div class="photo-upload-wrap">
+              <div class="photo-preview rect" id="newProductPreview" onclick="document.getElementById('newProductInput').click()" title="Click to upload">
+                📦
+              </div>
+              <div class="photo-upload-info">
+                <button class="btn btn-ghost btn-small" onclick="document.getElementById('newProductInput').click()">📷 Upload Image</button>
+                <p>JPG or PNG · Max 3MB</p>
+                <div class="photo-name" id="newProductName"></div>
+              </div>
+            </div>
+            <input type="file" id="newProductInput" accept="image/*" onchange="handleNewProductPhoto(this)">
+          </div>
+
+          <div class="field-row-2">
+            <div class="field-row" style="margin-bottom:0">
+              <label>Category</label>
+              <select id="f-cat">
+                <option>Beauty</option><option>Fashion</option><option>Home</option>
+                <option>Kitchen</option><option>Fitness</option><option>Electronics</option>
+                <option>Books</option><option>Other</option>
+              </select>
+            </div>
+            <div class="field-row" style="margin-bottom:0">
+              <label>Badge</label>
+              <select id="f-badge">
+                <option value="">None</option>
+                <option value="fave">⭐ Fave</option>
+                <option value="new">🆕 New</option>
+                <option value="sale">🔥 Sale</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-row" style="margin-top:14px">
+            <label>Short Note (optional)</label>
+            <input type="text" id="f-note" placeholder="e.g. My holy grail serum!">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:4px">
+            <button class="btn btn-rose btn-small" onclick="saveNewLink()">Save Link</button>
+            <button class="btn btn-ghost btn-small" onclick="toggleAddForm(false)">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:12px" id="addBtn" onclick="toggleAddForm(true)">+ Add New Link</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ PUBLIC VIEW ══════════ -->
+<div id="publicView">
+  <div class="pub-hero">
+    <div class="pub-avatar" id="pubAvatar">🛍️</div>
+    <div class="pub-handle" id="pubHandle">@yourhandle</div>
+    <h1 class="pub-name" id="pubName">My Amazon Finds</h1>
+    <p class="pub-bio" id="pubBio">Amazon finds I love ✨</p>
+    <div class="pub-socials" id="pubSocials"></div>
+  </div>
+  <div class="pub-filters" id="pubFilters"></div>
+  <div class="pub-divider"><span>My picks</span></div>
+  <div class="pub-cards" id="pubCards"></div>
+  <div class="pub-footer">
+    <p>✨ Affiliate links — I earn a small commission at no extra cost to you.</p>
+    <p style="margin-top:4px" id="pubFooterHandle"></p>
+  </div>
+  <button class="admin-fab" onclick="showLogin()">⚙️ Admin</button>
+</div>
+
+<!-- ══════════ EDIT MODAL ══════════ -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal-box">
+    <h3>✏️ Edit Link</h3>
+    <input type="hidden" id="e-id">
+    <div class="field-row">
+      <label>Product Name *</label>
+      <input type="text" id="e-name">
+    </div>
+    <div class="field-row">
+      <label>Amazon Affiliate URL *</label>
+      <input type="url" id="e-url">
+    </div>
+
+    <!-- Edit product image -->
+    <div class="field-row">
+      <label>Product Image</label>
+      <div class="photo-upload-wrap">
+        <div class="photo-preview rect" id="editProductPreview" onclick="document.getElementById('editProductInput').click()" title="Click to change">
+          📦
+        </div>
+        <div class="photo-upload-info">
+          <button class="btn btn-ghost btn-small" onclick="document.getElementById('editProductInput').click()">📷 Change Image</button>
+          <p>Upload a new image to replace</p>
+          <div class="photo-name" id="editProductName"></div>
+        </div>
+      </div>
+      <input type="file" id="editProductInput" accept="image/*" onchange="handleEditProductPhoto(this)">
+    </div>
+
+    <div class="field-row-2">
+      <div class="field-row" style="margin-bottom:0">
+        <label>Category</label>
+        <select id="e-cat">
+          <option>Beauty</option><option>Fashion</option><option>Home</option>
+          <option>Kitchen</option><option>Fitness</option><option>Electronics</option>
+          <option>Books</option><option>Other</option>
+        </select>
+      </div>
+      <div class="field-row" style="margin-bottom:0">
+        <label>Badge</label>
+        <select id="e-badge">
+          <option value="">None</option>
+          <option value="fave">⭐ Fave</option>
+          <option value="new">🆕 New</option>
+          <option value="sale">🔥 Sale</option>
+        </select>
+      </div>
+    </div>
+    <div class="field-row" style="margin-top:14px">
+      <label>Short Note</label>
+      <input type="text" id="e-note">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-small" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-rose btn-small" onclick="saveEditLink()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ═══ STORAGE ═══
+const LS = {
+  get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch(e) { return null; } },
+  set: (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch(e) { return false; } },
+};
+
+const EMOJIS = { Beauty:'💄', Fashion:'👗', Home:'🏠', Kitchen:'🍳', Fitness:'💪', Electronics:'📱', Books:'📚', Other:'🔗' };
+
+// Temp holders for newly selected images (base64)
+let _newProductImg  = null; // for add form
+let _editProductImg = null; // for edit modal
+
+function initDefaults() {
+  if (!LS.get('aff_pw'))      LS.set('aff_pw', 'admin123');
+  if (!LS.get('aff_profile')) LS.set('aff_profile', {
+    name:'My Amazon Finds', insta:'@yourhandle', tiktok:'',
+    bio:'Amazon finds I actually love & use ✨ Affiliate links — I earn a small commission at no extra cost to you 💛',
+    photo: null
+  });
+  if (!LS.get('aff_links'))   LS.set('aff_links', []);
+}
+
+// ═══ IMAGE UTILS ═══
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    if (file.size > 5 * 1024 * 1024) { rej('File too large (max 5MB)'); return; }
+    const r = new FileReader();
+    r.onload = e => res(e.target.result);
+    r.onerror = () => rej('Failed to read file');
+    r.readAsDataURL(file);
+  });
+}
+
+function setPreview(el, src, fallback) {
+  if (src) { el.innerHTML = `<img src="${src}" alt="preview">`; }
+  else      { el.innerHTML = fallback; }
+}
+
+// Profile photo
+async function handleProfilePhoto(input) {
+  const file = input.files[0]; if (!file) return;
+  try {
+    const b64 = await fileToBase64(file);
+    setPreview(document.getElementById('profilePhotoPreview'), b64, '🛍️');
+    document.getElementById('profilePhotoName').textContent = '✓ ' + file.name;
+    // Save directly into profile
+    const p = LS.get('aff_profile') || {};
+    p.photo = b64;
+    LS.set('aff_profile', p);
+    toast('✅ Profile photo updated!');
+  } catch(e) { toast('❌ ' + e); }
+  input.value = '';
+}
+
+// New link product image
+async function handleNewProductPhoto(input) {
+  const file = input.files[0]; if (!file) return;
+  try {
+    const b64 = await fileToBase64(file);
+    _newProductImg = b64;
+    setPreview(document.getElementById('newProductPreview'), b64, '📦');
+    document.getElementById('newProductName').textContent = '✓ ' + file.name;
+  } catch(e) { toast('❌ ' + e); }
+  input.value = '';
+}
+
+// Edit modal product image
+async function handleEditProductPhoto(input) {
+  const file = input.files[0]; if (!file) return;
+  try {
+    const b64 = await fileToBase64(file);
+    _editProductImg = b64;
+    setPreview(document.getElementById('editProductPreview'), b64, '📦');
+    document.getElementById('editProductName').textContent = '✓ ' + file.name;
+  } catch(e) { toast('❌ ' + e); }
+  input.value = '';
+}
+
+// ═══ AUTH ═══
+function doLogin() {
+  const pw = document.getElementById('pwInput').value;
+  if (pw === (LS.get('aff_pw') || 'admin123')) {
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('pwInput').value = '';
+    showAdmin();
+  } else {
+    document.getElementById('loginError').textContent = '❌ Incorrect password';
+  }
+}
+function logout()    { showScreen('loginScreen'); document.getElementById('pwInput').value = ''; }
+function showLogin() { showScreen('loginScreen'); }
+function changePassword() {
+  const np = prompt('Enter new password (min 4 characters):');
+  if (!np) return;
+  if (np.length < 4) { toast('Password must be at least 4 characters'); return; }
+  LS.set('aff_pw', np); toast('✅ Password updated!');
+}
+
+// ═══ SCREENS ═══
+function showScreen(id) {
+  document.getElementById('loginScreen').style.display = id === 'loginScreen' ? 'flex'  : 'none';
+  document.getElementById('adminView').style.display   = id === 'adminView'   ? 'block' : 'none';
+  document.getElementById('publicView').style.display  = id === 'publicView'  ? 'flex'  : 'none';
+}
+function showAdmin() {
+  showScreen('adminView');
+  loadProfileForm();
+  renderAdminLinks();
+}
+function showPublic() {
+  renderPublic();
+  showScreen('publicView');
+}
+
+// ═══ PROFILE ═══
+function loadProfileForm() {
+  const p = LS.get('aff_profile') || {};
+  document.getElementById('p-name').value   = p.name   || '';
+  document.getElementById('p-insta').value  = p.insta  || '';
+  document.getElementById('p-tiktok').value = p.tiktok || '';
+  document.getElementById('p-bio').value    = p.bio    || '';
+  // Show existing photo if saved
+  setPreview(document.getElementById('profilePhotoPreview'), p.photo || null, '🛍️');
+  if (p.photo) document.getElementById('profilePhotoName').textContent = '✓ Photo saved';
+}
+function saveProfile() {
+  const p = LS.get('aff_profile') || {};
+  p.name   = document.getElementById('p-name').value.trim()  || 'My Amazon Finds';
+  p.insta  = document.getElementById('p-insta').value.trim();
+  p.tiktok = document.getElementById('p-tiktok').value.trim();
+  p.bio    = document.getElementById('p-bio').value.trim();
+  // photo is saved immediately on upload — no need to re-save here
+  const ok = LS.set('aff_profile', p);
+  if (ok) toast('✅ Profile saved!');
+  else toast('⚠️ Storage full — try removing some large images');
+}
+
+// ═══ ADMIN LINKS ═══
+function getLinks() { return LS.get('aff_links') || []; }
+function setLinks(l) {
+  const ok = LS.set('aff_links', l);
+  if (!ok) toast('⚠️ Storage full — try removing some large images');
+  return ok;
+}
+
+function renderAdminLinks() {
+  const links = getLinks();
+  document.getElementById('linkCount').textContent = `(${links.length} link${links.length !== 1 ? 's' : ''})`;
+  const list = document.getElementById('adminLinkList');
+  if (!links.length) {
+    list.innerHTML = `<div class="empty-state"><div class="ei">🔗</div><p>No links yet — add your first one below!</p></div>`;
+    return;
+  }
+  list.innerHTML = links.map(l => `
+    <div class="admin-link-item" data-id="${l.id}">
+      <span class="drag-handle" title="Drag to reorder">⠿</span>
+      <div class="admin-link-thumb">
+        ${l.image ? `<img src="${l.image}" alt="">` : (EMOJIS[l.cat] || '🔗')}
+      </div>
+      <div class="admin-link-info">
+        <div class="admin-link-name">${esc(l.name)}</div>
+        <div class="admin-link-url">${esc(l.url)}</div>
+        <span class="admin-link-cat">${esc(l.cat)}</span>
+        ${l.badge ? `<span class="admin-link-cat" style="background:var(--green-lt);color:#145c3c;margin-left:4px">${badgeLabel(l.badge)}</span>` : ''}
+      </div>
+      <div class="admin-link-actions">
+        <button class="btn btn-ghost btn-small" onclick="openEditModal(${l.id})">Edit</button>
+        <button class="btn btn-danger btn-small" onclick="deleteLink(${l.id})">✕</button>
+      </div>
+    </div>
+  `).join('');
+  initDrag();
+}
+
+function toggleAddForm(show) {
+  document.getElementById('addFormWrap').classList.toggle('hidden', !show);
+  document.getElementById('addBtn').classList.toggle('hidden', show);
+  if (show) { document.getElementById('f-name').focus(); }
+  else {
+    // Reset add form
+    ['f-name','f-url','f-note'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('f-badge').value = '';
+    _newProductImg = null;
+    setPreview(document.getElementById('newProductPreview'), null, '📦');
+    document.getElementById('newProductName').textContent = '';
+  }
+}
+
+function saveNewLink() {
+  const name = document.getElementById('f-name').value.trim();
+  const url  = document.getElementById('f-url').value.trim();
+  if (!name) { toast('Please enter a product name'); return; }
+  if (!url)  { toast('Please enter a URL'); return; }
+  const links = getLinks();
+  links.push({
+    id:    Date.now(),
+    name, url,
+    image: _newProductImg || null,
+    cat:   document.getElementById('f-cat').value,
+    badge: document.getElementById('f-badge').value,
+    note:  document.getElementById('f-note').value.trim(),
+  });
+  if (setLinks(links)) {
+    toggleAddForm(false);
+    renderAdminLinks();
+    toast('✅ Link added!');
+  }
+}
+
+function deleteLink(id) {
+  if (!confirm('Remove this link?')) return;
+  setLinks(getLinks().filter(l => l.id !== id));
+  renderAdminLinks();
+  toast('Link removed');
+}
+
+// ═══ EDIT MODAL ═══
+function openEditModal(id) {
+  const l = getLinks().find(l => l.id === id); if (!l) return;
+  document.getElementById('e-id').value    = l.id;
+  document.getElementById('e-name').value  = l.name;
+  document.getElementById('e-url').value   = l.url;
+  document.getElementById('e-cat').value   = l.cat;
+  document.getElementById('e-badge').value = l.badge || '';
+  document.getElementById('e-note').value  = l.note  || '';
+  _editProductImg = null; // reset temp
+  setPreview(document.getElementById('editProductPreview'), l.image || null, '📦');
+  document.getElementById('editProductName').textContent = l.image ? '✓ Image saved' : '';
+  document.getElementById('editModal').classList.add('open');
+}
+function closeEditModal() {
+  document.getElementById('editModal').classList.remove('open');
+  _editProductImg = null;
+}
+function saveEditLink() {
+  const id   = parseInt(document.getElementById('e-id').value);
+  const name = document.getElementById('e-name').value.trim();
+  const url  = document.getElementById('e-url').value.trim();
+  if (!name || !url) { toast('Name and URL are required'); return; }
+  const links = getLinks().map(l => {
+    if (l.id !== id) return l;
+    return {
+      ...l, name, url,
+      image: _editProductImg !== null ? _editProductImg : l.image,
+      cat:   document.getElementById('e-cat').value,
+      badge: document.getElementById('e-badge').value,
+      note:  document.getElementById('e-note').value.trim(),
+    };
+  });
+  if (setLinks(links)) {
+    closeEditModal();
+    renderAdminLinks();
+    toast('✅ Link updated!');
+  }
+}
+document.getElementById('editModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('editModal')) closeEditModal();
+});
+
+// ═══ DRAG TO REORDER ═══
+function initDrag() {
+  const list = document.getElementById('adminLinkList');
+  let dragging = null;
+  list.querySelectorAll('.admin-link-item').forEach(item => {
+    item.draggable = true;
+    item.addEventListener('dragstart', () => { dragging = item; item.style.opacity = '.4'; });
+    item.addEventListener('dragend',   () => { dragging = null; item.style.opacity = '1'; saveOrder(); });
+    item.addEventListener('dragover',  e => {
+      e.preventDefault();
+      const after = getDragAfter(list, e.clientY);
+      if (after == null) list.appendChild(dragging);
+      else list.insertBefore(dragging, after);
+    });
+  });
+}
+function getDragAfter(container, y) {
+  return [...container.querySelectorAll('.admin-link-item:not([style*="opacity"])')].reduce((closest, child) => {
+    const box = child.getBoundingClientRect();
+    const offset = y - box.top - box.height / 2;
+    return offset < 0 && offset > closest.offset ? { offset, element: child } : closest;
+  }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+function saveOrder() {
+  const ids   = [...document.querySelectorAll('#adminLinkList .admin-link-item')].map(el => parseInt(el.dataset.id));
+  const links = getLinks();
+  setLinks(ids.map(id => links.find(l => l.id === id)).filter(Boolean));
+}
+
+// ═══ PUBLIC RENDER ═══
+let pubActiveFilter = 'All';
+
+function renderPublic() {
+  const p     = LS.get('aff_profile') || {};
+  const links = getLinks();
+
+  // Avatar
+  const avatarEl = document.getElementById('pubAvatar');
+  if (p.photo) avatarEl.innerHTML = `<img src="${p.photo}" alt="${esc(p.name || '')}">`;
+  else avatarEl.innerHTML = '🛍️';
+
+  document.getElementById('pubHandle').textContent = p.insta  || '@yourhandle';
+  document.getElementById('pubName').textContent   = p.name   || 'My Amazon Finds';
+  document.getElementById('pubBio').textContent    = p.bio    || '';
+
+  // Socials
+  let sh = '';
+  if (p.insta)  sh += `<a class="pub-social" href="https://instagram.com/${encodeURIComponent(p.insta.replace('@',''))}" target="_blank" rel="noopener" title="Instagram">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></a>`;
+  if (p.tiktok) sh += `<a class="pub-social" href="https://tiktok.com/@${encodeURIComponent(p.tiktok.replace('@',''))}" target="_blank" rel="noopener" title="TikTok">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.77a4.85 4.85 0 0 1-1.01-.08z"/></svg></a>`;
+  document.getElementById('pubSocials').innerHTML = sh;
+
+  // Filters
+  const cats = ['All', ...new Set(links.map(l => l.cat))];
+  document.getElementById('pubFilters').innerHTML = cats.map(cat =>
+    `<button class="pub-filter-btn ${pubActiveFilter === cat ? 'active' : ''}" onclick="pubFilter('${esc(cat)}')">${esc(cat)}</button>`
+  ).join('');
+
+  renderPubCards(links);
+
+  const fh = document.getElementById('pubFooterHandle');
+  fh.innerHTML = p.insta ? `Made with love · <a href="https://instagram.com/${encodeURIComponent(p.insta.replace('@',''))}" target="_blank">${esc(p.insta)}</a>` : '';
+}
+
+function pubFilter(cat) {
+  pubActiveFilter = cat;
+  document.querySelectorAll('.pub-filter-btn').forEach(b => b.classList.toggle('active', b.textContent.trim() === cat));
+  renderPubCards(getLinks());
+}
+
+function renderPubCards(links) {
+  const filtered = pubActiveFilter === 'All' ? links : links.filter(l => l.cat === pubActiveFilter);
+  const container = document.getElementById('pubCards');
+  if (!filtered.length) {
+    container.innerHTML = `<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:0.85rem">No links in this category yet.</div>`;
+    return;
+  }
+  container.innerHTML = filtered.map(l => {
+    const thumb = l.image
+      ? `<div class="pub-card-thumb"><img src="${l.image}" alt="${esc(l.name)}"></div>`
+      : `<div class="pub-card-thumb">${EMOJIS[l.cat] || '🔗'}</div>`;
+    const badge = { fave:'<span class="pub-badge pub-badge-fave">⭐ Fave</span>', new:'<span class="pub-badge pub-badge-new">🆕 New</span>', sale:'<span class="pub-badge pub-badge-sale">🔥 Sale</span>' }[l.badge] || '';
+    return `<a class="pub-card" href="${escAttr(l.url)}" target="_blank" rel="noopener">
+      ${thumb}
+      <div class="pub-card-body">
+        <div class="pub-card-title">${esc(l.name)}</div>
+        <div class="pub-card-sub">${esc(l.note || l.cat + ' · Amazon')}</div>
+      </div>
+      ${badge}
+      <span class="pub-arrow">›</span>
+    </a>`;
+  }).join('');
+}
+
+// ═══ HELPERS ═══
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return String(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+function badgeLabel(b) { return {fave:'⭐ Fave',new:'🆕 New',sale:'🔥 Sale'}[b] || ''; }
+
+let _toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ═══ BOOT ═══
+initDefaults();
+showPublic();
+</script>
+</body>
+</html>
